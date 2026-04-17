@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Container, Card, Spinner, Alert, Badge, Button } from 'react-bootstrap';
 import { getToken } from '../utils/auth';
 import { useNavigate } from 'react-router-dom';
-
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+import { API_BASE_URL } from '../utils/api';
 
 const formatNotificationTime = (value) => {
   if (!value) return '';

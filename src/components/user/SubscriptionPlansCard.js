@@ -2,9 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Card, Badge, Button, Alert } from 'react-bootstrap';
 import { getToken } from '../../utils/auth';
 import VirtualVisaPaymentModal from './VirtualVisaPaymentModal';
-
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+import { API_BASE_URL } from '../../utils/api';
 
 const PLANS = [
   { key: 'monthly', label: '1 Month', price: 3, months: 1 },

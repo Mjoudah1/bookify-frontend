@@ -12,9 +12,7 @@ import {
   Spinner,
 } from 'react-bootstrap';
 import { getToken } from '../utils/auth';
-
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+import { API_BASE_URL } from '../utils/api';
 
 const formatMessageTime = (value) => {
   if (!value) return '';

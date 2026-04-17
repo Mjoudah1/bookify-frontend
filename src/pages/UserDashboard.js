@@ -11,9 +11,7 @@ import BooksGrid from '../components/user/BooksGrid';
 import SubscriptionPlansCard from '../components/user/SubscriptionPlansCard';
 import { fetchOwnedBooks } from '../services/userDashboardService';
 import { fetchMyInterestBooks } from '../services/interestsService';
-
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+import { API_BASE_URL } from '../utils/api';
 
 export default function UserDashboard() {
   const [books, setBooks] = useState([]);

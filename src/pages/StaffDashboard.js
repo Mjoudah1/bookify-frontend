@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { getToken } from '../utils/auth';
 import { Container, Table, Button, Badge } from 'react-bootstrap';
+import { API_BASE_URL } from '../utils/api';
 
 export default function StaffDashboard() {
   const [books, setBooks] = useState([]);
@@ -10,7 +11,7 @@ export default function StaffDashboard() {
   // ✅ Load all books (borrowed + available)
   const loadBooks = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/books', {
+      const res = await axios.get(`${API_BASE_URL}/api/books`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       setBooks(res.data);
@@ -26,7 +27,7 @@ export default function StaffDashboard() {
 
     try {
       await axios.post(
-        'http://localhost:5000/api/books/return',
+        `${API_BASE_URL}/api/books/return`,
         { bookId },
         { headers: { Authorization: `Bearer ${getToken()}` } }
       );

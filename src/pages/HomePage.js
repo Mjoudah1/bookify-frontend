@@ -6,9 +6,7 @@ import HomeHero from '../components/home/HomeHero';
 import BooksSlider from '../components/home/BooksSlider';
 import SectionSlider from '../components/home/SectionSlider';
 import HomeFooter from '../components/home/HomeFooter';
-
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+import { API_BASE_URL } from '../utils/api';
 
 export default function HomePage() {
   const [books, setBooks] = useState([]);

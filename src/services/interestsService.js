@@ -1,5 +1,4 @@
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+import { API_BASE_URL } from '../utils/api';
 
 export async function fetchInterestCategories() {
   const res = await fetch(`${API_BASE_URL}/api/books/categories/list`);

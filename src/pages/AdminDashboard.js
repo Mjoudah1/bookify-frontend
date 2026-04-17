@@ -17,9 +17,7 @@ import CreateUserCard from '../components/admin/CreateUserCard';
 import BooksTable from '../components/admin/BooksTable';
 import EditBookModal from '../components/admin/EditBookModal';
 import UsersTable from '../components/admin/UsersTable';
-
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+import { API_BASE_URL } from '../utils/api';
 
 const PLAN_LABELS = {
   none: 'No Plan',

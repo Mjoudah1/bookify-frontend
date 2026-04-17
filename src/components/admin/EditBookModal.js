@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Button, Alert, Row, Col, Dropdown } from 'react-bootstrap';
-
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+import { API_BASE_URL } from '../../utils/api';
 
 const formatEditBookError = (message) => {
   if (!message) return 'Something went wrong while updating this book.';

@@ -10,6 +10,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { getToken, getUserRole, logout } from '../utils/auth';
 import { jwtDecode } from 'jwt-decode';
+import { API_BASE_URL } from '../utils/api';
 
 export default function NavbarComponent() {
   const navigate = useNavigate();
@@ -18,9 +19,6 @@ export default function NavbarComponent() {
 
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-
-  const API_BASE_URL =
-    process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
   let username = '';
   let role = storedRole ? storedRole.toLowerCase() : null;
