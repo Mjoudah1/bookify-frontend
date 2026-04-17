@@ -10,8 +10,9 @@ import {
   InputGroup,
 } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL } from '../utils/api';
 
-const API_BASE = 'http://localhost:5000/api/auth';
+const API_BASE = `${API_BASE_URL}/api/auth`;
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');

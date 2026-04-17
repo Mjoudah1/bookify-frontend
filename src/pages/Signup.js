@@ -14,10 +14,11 @@ import {
 } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { saveToken, getUserRole, setHasInterests } from '../utils/auth';
+import { API_BASE_URL } from '../utils/api';
 
-const SIGNUP_URL = 'http://localhost:5000/api/auth/signup';
-const LOGIN_URL = 'http://localhost:5000/api/auth/login';
-const SOCIAL_AUTH_URL = 'http://localhost:5000/api/auth/social';
+const SIGNUP_URL = `${API_BASE_URL}/api/auth/signup`;
+const LOGIN_URL = `${API_BASE_URL}/api/auth/login`;
+const SOCIAL_AUTH_URL = `${API_BASE_URL}/api/auth/social`;
 
 export default function Signup() {
   const [form, setForm] = useState({

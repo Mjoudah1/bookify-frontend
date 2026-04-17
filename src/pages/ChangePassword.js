@@ -18,8 +18,9 @@ import {
   InputGroup,
 } from 'react-bootstrap';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../utils/api';
 
-const backendURL = 'http://localhost:5000/api/auth/change-password';
+const backendURL = `${API_BASE_URL}/api/auth/change-password`;
 
 export default function ChangePassword() {
   const location = useLocation();

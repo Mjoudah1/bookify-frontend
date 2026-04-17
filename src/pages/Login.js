@@ -19,10 +19,11 @@ import {
   mustChangePassword,
   setHasInterests,
 } from '../utils/auth';
+import { API_BASE_URL } from '../utils/api';
 
-const backendURL = 'http://localhost:5000/api/auth/login';
+const backendURL = `${API_BASE_URL}/api/auth/login`;
 const REMEMBER_KEY = 'bookifyRememberedEmail';
-const SOCIAL_AUTH_URL = 'http://localhost:5000/api/auth/social';
+const SOCIAL_AUTH_URL = `${API_BASE_URL}/api/auth/social`;
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
