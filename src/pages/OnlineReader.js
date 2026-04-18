@@ -227,6 +227,7 @@ export default function OnlineReader() {
   React.useEffect(() => {
     let releaseTimer;
     let persistentShield = false;
+    let captureLockTriggered = false;
 
     const showCaptureShield = (message, options = {}) => {
       const { persist = false, duration = 1800 } = options;
@@ -249,8 +250,13 @@ export default function OnlineReader() {
       showCaptureShield(message, { persist: true });
     };
 
+    const triggerCaptureLock = (message) => {
+      captureLockTriggered = true;
+      showCaptureShield(message, { persist: true });
+    };
+
     const releasePersistentShield = () => {
-      if (!persistentShield || document.hidden) {
+      if (!persistentShield || document.hidden || captureLockTriggered) {
         return;
       }
 
@@ -300,9 +306,15 @@ export default function OnlineReader() {
 
       event.preventDefault();
       event.stopPropagation();
-      showCaptureShield(
-        'Capture, print, save, and inspection shortcuts are disabled in the online reader.'
-      );
+      if (key === 'printscreen') {
+        triggerCaptureLock(
+          'The reader was locked because a screenshot attempt was detected. Reload the page to continue reading.'
+        );
+      } else {
+        showCaptureShield(
+          'Capture, print, save, and inspection shortcuts are disabled in the online reader.'
+        );
+      }
 
       if (navigator.clipboard?.writeText) {
         try {
@@ -334,8 +346,8 @@ export default function OnlineReader() {
     };
 
     const blockDisplayCapture = () => {
-      showCaptureShield(
-        'Screen recording and display capture are blocked in this reading session.'
+      triggerCaptureLock(
+        'The reader was locked because a screen recording or display capture attempt was detected. Reload the page to continue reading.'
       );
       return Promise.reject(
         new Error('Display capture is disabled in the protected reader.')
