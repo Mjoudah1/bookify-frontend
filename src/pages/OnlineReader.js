@@ -3,7 +3,7 @@ import { Container } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import useOnlineReader from '../hooks/useOnlineReader';
-import { getToken, getUserInfo } from '../utils/auth';
+import { getToken } from '../utils/auth';
 import ReaderLoading from '../components/reader/ReaderLoading';
 import ReaderError from '../components/reader/ReaderError';
 import ReaderHeader from '../components/reader/ReaderHeader';
@@ -39,7 +39,6 @@ const getPreferredVoice = (voices, selectedVoice, language) => {
 export default function OnlineReader() {
   const { bookId } = useParams();
   const navigate = useNavigate();
-  const userInfo = React.useMemo(() => getUserInfo(), []);
   const originalGetDisplayMediaRef = React.useRef(null);
   const [downloading, setDownloading] = React.useState(false);
   const [voices, setVoices] = React.useState([]);
@@ -50,9 +49,6 @@ export default function OnlineReader() {
   const [isPaused, setIsPaused] = React.useState(false);
   const [captureBlocked, setCaptureBlocked] = React.useState(false);
   const [captureMessage, setCaptureMessage] = React.useState('');
-  const [watermarkSeed, setWatermarkSeed] = React.useState(() =>
-    Math.random().toString(36).slice(2, 8).toUpperCase()
-  );
   const utterancesRef = React.useRef([]);
 
   const {
@@ -226,19 +222,16 @@ export default function OnlineReader() {
 
   React.useEffect(() => {
     let releaseTimer;
-    let persistentShield = false;
-    let captureLockTriggered = false;
 
     const showCaptureShield = (message, options = {}) => {
-      const { persist = false, duration = 1800 } = options;
+      const { duration = 1800 } = options;
       window.clearTimeout(releaseTimer);
-      persistentShield = persist;
       setCaptureBlocked(true);
       setCaptureMessage(
         message || 'Reader content is temporarily hidden for protection.'
       );
 
-      if (!persist) {
+      if (Number.isFinite(duration) && duration > 0) {
         releaseTimer = window.setTimeout(() => {
           setCaptureBlocked(false);
           setCaptureMessage('');
@@ -246,47 +239,22 @@ export default function OnlineReader() {
       }
     };
 
-    const hideReaderUntilFocus = (message) => {
-      showCaptureShield(message, { persist: true });
-    };
-
-    const triggerCaptureLock = (message) => {
-      captureLockTriggered = true;
-      showCaptureShield(message, { persist: true });
-    };
-
-    const releasePersistentShield = () => {
-      if (!persistentShield || document.hidden || captureLockTriggered) {
-        return;
-      }
-
-      persistentShield = false;
-      window.clearTimeout(releaseTimer);
-      releaseTimer = window.setTimeout(() => {
-        setCaptureBlocked(false);
-        setCaptureMessage('');
-      }, 250);
+    const lockReader = (message) => {
+      showCaptureShield(message, { duration: null });
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        hideReaderUntilFocus(
-          'Reader content was hidden because the tab lost visibility.'
+        lockReader(
+          'The reader was locked after the tab lost visibility. Reload the page to continue reading.'
         );
-        return;
       }
-
-      releasePersistentShield();
     };
 
     const handleWindowBlur = () => {
-      hideReaderUntilFocus(
-        'Reader content was hidden because the window lost focus.'
+      lockReader(
+        'The reader was locked after the window lost focus. Reload the page to continue reading.'
       );
-    };
-
-    const handleWindowFocus = () => {
-      releasePersistentShield();
     };
 
     const handleKeyDown = async (event) => {
@@ -307,7 +275,7 @@ export default function OnlineReader() {
       event.preventDefault();
       event.stopPropagation();
       if (key === 'printscreen') {
-        triggerCaptureLock(
+        lockReader(
           'The reader was locked because a screenshot attempt was detected. Reload the page to continue reading.'
         );
       } else {
@@ -346,7 +314,7 @@ export default function OnlineReader() {
     };
 
     const blockDisplayCapture = () => {
-      triggerCaptureLock(
+      lockReader(
         'The reader was locked because a screen recording or display capture attempt was detected. Reload the page to continue reading.'
       );
       return Promise.reject(
@@ -366,7 +334,6 @@ export default function OnlineReader() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('selectstart', preventSelection);
     window.addEventListener('blur', handleWindowBlur);
-    window.addEventListener('focus', handleWindowFocus);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('contextmenu', preventContextMenu);
     window.addEventListener('copy', preventCopy);
@@ -379,7 +346,6 @@ export default function OnlineReader() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('selectstart', preventSelection);
       window.removeEventListener('blur', handleWindowBlur);
-      window.removeEventListener('focus', handleWindowFocus);
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('contextmenu', preventContextMenu);
       window.removeEventListener('copy', preventCopy);
@@ -393,25 +359,6 @@ export default function OnlineReader() {
       }
     };
   }, []);
-
-  React.useEffect(() => {
-    const timerId = window.setInterval(() => {
-      setWatermarkSeed(Math.random().toString(36).slice(2, 8).toUpperCase());
-    }, 4000);
-
-    return () => window.clearInterval(timerId);
-  }, []);
-
-  const watermarkText = React.useMemo(() => {
-    const identity =
-      userInfo?.username ||
-      userInfo?.name ||
-      userInfo?.email ||
-      userInfo?.userId ||
-      'Protected Reader';
-
-    return `${identity} | ${book?.title || 'Protected Book'} | ${new Date().toLocaleTimeString()} | ${watermarkSeed}`;
-  }, [book?.title, userInfo, watermarkSeed]);
 
   const handleDownload = async () => {
     if (!canDownload || !downloadUrl) return;
@@ -506,7 +453,6 @@ export default function OnlineReader() {
           ebookUrl={ebookUrl}
           captureBlocked={captureBlocked}
           captureMessage={captureMessage}
-          watermarkText={watermarkText}
         />
       </Container>
     </div>
