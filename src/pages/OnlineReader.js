@@ -226,31 +226,61 @@ export default function OnlineReader() {
 
   React.useEffect(() => {
     let releaseTimer;
+    let persistentShield = false;
 
-    const showCaptureShield = (message) => {
+    const showCaptureShield = (message, options = {}) => {
+      const { persist = false, duration = 1800 } = options;
       window.clearTimeout(releaseTimer);
+      persistentShield = persist;
       setCaptureBlocked(true);
       setCaptureMessage(
         message || 'Reader content is temporarily hidden for protection.'
       );
+
+      if (!persist) {
+        releaseTimer = window.setTimeout(() => {
+          setCaptureBlocked(false);
+          setCaptureMessage('');
+        }, duration);
+      }
+    };
+
+    const hideReaderUntilFocus = (message) => {
+      showCaptureShield(message, { persist: true });
+    };
+
+    const releasePersistentShield = () => {
+      if (!persistentShield || document.hidden) {
+        return;
+      }
+
+      persistentShield = false;
+      window.clearTimeout(releaseTimer);
       releaseTimer = window.setTimeout(() => {
         setCaptureBlocked(false);
         setCaptureMessage('');
-      }, 1800);
+      }, 250);
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        showCaptureShield(
+        hideReaderUntilFocus(
           'Reader content was hidden because the tab lost visibility.'
         );
+        return;
       }
+
+      releasePersistentShield();
     };
 
     const handleWindowBlur = () => {
-      showCaptureShield(
+      hideReaderUntilFocus(
         'Reader content was hidden because the window lost focus.'
       );
+    };
+
+    const handleWindowFocus = () => {
+      releasePersistentShield();
     };
 
     const handleKeyDown = async (event) => {
@@ -324,6 +354,7 @@ export default function OnlineReader() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('selectstart', preventSelection);
     window.addEventListener('blur', handleWindowBlur);
+    window.addEventListener('focus', handleWindowFocus);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('contextmenu', preventContextMenu);
     window.addEventListener('copy', preventCopy);
@@ -336,6 +367,7 @@ export default function OnlineReader() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('selectstart', preventSelection);
       window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('focus', handleWindowFocus);
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('contextmenu', preventContextMenu);
       window.removeEventListener('copy', preventCopy);
