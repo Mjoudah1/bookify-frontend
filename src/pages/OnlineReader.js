@@ -3,7 +3,7 @@ import { Container } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import useOnlineReader from '../hooks/useOnlineReader';
-import { getToken } from '../utils/auth';
+import { getToken, getUserInfo } from '../utils/auth';
 import ReaderLoading from '../components/reader/ReaderLoading';
 import ReaderError from '../components/reader/ReaderError';
 import ReaderHeader from '../components/reader/ReaderHeader';
@@ -39,6 +39,8 @@ const getPreferredVoice = (voices, selectedVoice, language) => {
 export default function OnlineReader() {
   const { bookId } = useParams();
   const navigate = useNavigate();
+  const userInfo = React.useMemo(() => getUserInfo(), []);
+  const originalGetDisplayMediaRef = React.useRef(null);
   const [downloading, setDownloading] = React.useState(false);
   const [voices, setVoices] = React.useState([]);
   const [selectedVoice, setSelectedVoice] = React.useState('');
@@ -46,6 +48,11 @@ export default function OnlineReader() {
   const [voiceStatus, setVoiceStatus] = React.useState('');
   const [isSpeaking, setIsSpeaking] = React.useState(false);
   const [isPaused, setIsPaused] = React.useState(false);
+  const [captureBlocked, setCaptureBlocked] = React.useState(false);
+  const [captureMessage, setCaptureMessage] = React.useState('');
+  const [watermarkSeed, setWatermarkSeed] = React.useState(() =>
+    Math.random().toString(36).slice(2, 8).toUpperCase()
+  );
   const utterancesRef = React.useRef([]);
 
   const {
@@ -217,6 +224,151 @@ export default function OnlineReader() {
     };
   }, []);
 
+  React.useEffect(() => {
+    let releaseTimer;
+
+    const showCaptureShield = (message) => {
+      window.clearTimeout(releaseTimer);
+      setCaptureBlocked(true);
+      setCaptureMessage(
+        message || 'Reader content is temporarily hidden for protection.'
+      );
+      releaseTimer = window.setTimeout(() => {
+        setCaptureBlocked(false);
+        setCaptureMessage('');
+      }, 1800);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        showCaptureShield(
+          'Reader content was hidden because the tab lost visibility.'
+        );
+      }
+    };
+
+    const handleWindowBlur = () => {
+      showCaptureShield(
+        'Reader content was hidden because the window lost focus.'
+      );
+    };
+
+    const handleKeyDown = async (event) => {
+      const key = String(event.key || '').toLowerCase();
+      const blockedShortcut =
+        key === 'printscreen' ||
+        key === 'f12' ||
+        ((event.ctrlKey || event.metaKey) &&
+          ['p', 's', 'u', 'c'].includes(key)) ||
+        ((event.ctrlKey || event.metaKey) &&
+          event.shiftKey &&
+          ['i', 'j', 'c', 's'].includes(key));
+
+      if (!blockedShortcut) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      showCaptureShield(
+        'Capture, print, save, and inspection shortcuts are disabled in the online reader.'
+      );
+
+      if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText('');
+        } catch {
+          // Clipboard access may be unavailable depending on the browser.
+        }
+      }
+    };
+
+    const preventContextMenu = (event) => {
+      event.preventDefault();
+    };
+
+    const preventCopy = (event) => {
+      event.preventDefault();
+      showCaptureShield('Copying and quick capture actions are disabled here.');
+    };
+
+    const preventPrint = (event) => {
+      if (event?.preventDefault) {
+        event.preventDefault();
+      }
+      showCaptureShield('Printing is disabled while protected reading is active.');
+    };
+
+    const preventSelection = (event) => {
+      event.preventDefault();
+    };
+
+    const blockDisplayCapture = () => {
+      showCaptureShield(
+        'Screen recording and display capture are blocked in this reading session.'
+      );
+      return Promise.reject(
+        new Error('Display capture is disabled in the protected reader.')
+      );
+    };
+
+    if (
+      navigator.mediaDevices &&
+      typeof navigator.mediaDevices.getDisplayMedia === 'function'
+    ) {
+      originalGetDisplayMediaRef.current =
+        navigator.mediaDevices.getDisplayMedia.bind(navigator.mediaDevices);
+      navigator.mediaDevices.getDisplayMedia = blockDisplayCapture;
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('selectstart', preventSelection);
+    window.addEventListener('blur', handleWindowBlur);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('contextmenu', preventContextMenu);
+    window.addEventListener('copy', preventCopy);
+    window.addEventListener('cut', preventCopy);
+    window.addEventListener('dragstart', preventSelection);
+    window.addEventListener('beforeprint', preventPrint);
+
+    return () => {
+      window.clearTimeout(releaseTimer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('selectstart', preventSelection);
+      window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('contextmenu', preventContextMenu);
+      window.removeEventListener('copy', preventCopy);
+      window.removeEventListener('cut', preventCopy);
+      window.removeEventListener('dragstart', preventSelection);
+      window.removeEventListener('beforeprint', preventPrint);
+
+      if (navigator.mediaDevices && originalGetDisplayMediaRef.current) {
+        navigator.mediaDevices.getDisplayMedia =
+          originalGetDisplayMediaRef.current;
+      }
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const timerId = window.setInterval(() => {
+      setWatermarkSeed(Math.random().toString(36).slice(2, 8).toUpperCase());
+    }, 4000);
+
+    return () => window.clearInterval(timerId);
+  }, []);
+
+  const watermarkText = React.useMemo(() => {
+    const identity =
+      userInfo?.username ||
+      userInfo?.name ||
+      userInfo?.email ||
+      userInfo?.userId ||
+      'Protected Reader';
+
+    return `${identity} | ${book?.title || 'Protected Book'} | ${new Date().toLocaleTimeString()} | ${watermarkSeed}`;
+  }, [book?.title, userInfo, watermarkSeed]);
+
   const handleDownload = async () => {
     if (!canDownload || !downloadUrl) return;
 
@@ -305,7 +457,13 @@ export default function OnlineReader() {
           onRateChange={setSpeechRate}
         />
 
-        <ReaderFrame book={book} ebookUrl={ebookUrl} />
+        <ReaderFrame
+          book={book}
+          ebookUrl={ebookUrl}
+          captureBlocked={captureBlocked}
+          captureMessage={captureMessage}
+          watermarkText={watermarkText}
+        />
       </Container>
     </div>
   );

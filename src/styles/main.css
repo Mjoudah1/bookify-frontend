@@ -5084,6 +5084,96 @@ a:hover {
   background: #ffffff;
 }
 
+.reader-frame-body {
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.reader-watermark-layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2.5rem;
+  padding: 2.5rem 1.75rem;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.reader-watermark {
+  align-self: center;
+  justify-self: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(15, 23, 42, 0.13);
+  transform: rotate(-28deg);
+  white-space: nowrap;
+  animation: readerWatermarkFloat 4s ease-in-out infinite;
+}
+
+@keyframes readerWatermarkFloat {
+  0% {
+    transform: rotate(-28deg) translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: rotate(-28deg) translate3d(8px, -6px, 0);
+  }
+
+  100% {
+    transform: rotate(-28deg) translate3d(0, 0, 0);
+  }
+}
+
+.reader-protection-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(15, 23, 42, 0.86);
+  backdrop-filter: blur(14px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+  z-index: 3;
+}
+
+.reader-protection-overlay.is-visible {
+  opacity: 1;
+}
+
+.reader-protection-card {
+  max-width: 460px;
+  padding: 1.3rem 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 22px;
+  text-align: center;
+  color: #f8fafc;
+  background: rgba(15, 23, 42, 0.6);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35);
+}
+
+.reader-protection-title {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.reader-protection-text {
+  margin-top: 0.55rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(226, 232, 240, 0.95);
+}
+
 .confirm-modal-dialog {
   max-width: 430px;
 }
