@@ -78,11 +78,6 @@ export default function UserDashboard() {
 
       setHasInterests(Boolean(profileData?.hasInterests));
 
-      if (!profileData?.hasInterests) {
-        navigate('/book-of-intrests');
-        return;
-      }
-
       setBooks(Array.isArray(interestData?.books) ? interestData.books : []);
       setOwnedBooks(owned);
       setCurrentUser(profileData);

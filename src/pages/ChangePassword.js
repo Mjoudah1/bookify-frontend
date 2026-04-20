@@ -117,17 +117,7 @@ export default function ChangePassword() {
           return;
         }
 
-        if (forcePasswordChange) {
-          navigate('/book-of-intrests', { replace: true });
-          return;
-        }
-
-        navigate(
-          res.data?.user?.hasInterests ? '/user' : '/book-of-intrests',
-          {
-            replace: true,
-          }
-        );
+        navigate('/user', { replace: true });
       }, 900);
     } catch (err) {
       const status = err.response?.status;
