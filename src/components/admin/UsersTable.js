@@ -175,16 +175,18 @@ export default function UsersTable({
                           </Button>
                         )}
 
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        className="admin-book-action admin-book-action--delete"
-                        onClick={() => handleDeleteUser(user._id)}
-                        disabled={loadingDeleteUser === user._id}
-                      >
-                        <i className="bi bi-trash3" aria-hidden="true" />
-                        {loadingDeleteUser === user._id ? 'Deleting...' : 'Delete'}
-                      </Button>
+                      {user.role !== 'admin' && (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="admin-book-action admin-book-action--delete"
+                          onClick={() => handleDeleteUser(user._id)}
+                          disabled={loadingDeleteUser === user._id}
+                        >
+                          <i className="bi bi-trash3" aria-hidden="true" />
+                          {loadingDeleteUser === user._id ? 'Deleting...' : 'Delete'}
+                        </Button>
+                      )}
                       </div>
                     </td>
                   </tr>

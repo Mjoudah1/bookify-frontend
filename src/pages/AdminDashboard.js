@@ -355,6 +355,12 @@ export default function AdminDashboard() {
   };
 
   const askDeleteUser = (userId) => {
+    const selectedUser = users.find((user) => user._id === userId);
+    if (selectedUser?.role === 'admin') {
+      setError('Admin accounts cannot be deleted.');
+      return;
+    }
+
     setConfirmDialog({
       show: true,
       title: 'Delete user',
