@@ -66,7 +66,11 @@ export default function Signup() {
   };
 
   const handleSocialSignup = (provider) => {
-    window.location.href = `${SOCIAL_AUTH_URL}/${provider}/start`;
+    const params = new URLSearchParams({
+      returnTo: window.location.origin,
+    });
+
+    window.location.href = `${SOCIAL_AUTH_URL}/${provider}/start?${params.toString()}`;
   };
 
   const handleSubmit = async (e) => {
@@ -412,15 +416,6 @@ export default function Signup() {
                     >
                       <i className="bi bi-google me-2" />
                       Continue with Google
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="light"
-                      className="w-100 py-2 fw-semibold border auth-secondary-btn"
-                      onClick={() => handleSocialSignup('x')}
-                    >
-                      <i className="bi bi-twitter-x me-2" />
-                      Continue with X
                     </Button>
                   </div>
 
