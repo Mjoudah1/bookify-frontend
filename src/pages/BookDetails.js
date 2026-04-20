@@ -18,6 +18,7 @@ import BookRating from '../components/BookRating';
 import VirtualVisaPaymentModal from '../components/user/VirtualVisaPaymentModal';
 import { getToken } from '../utils/auth';
 import { API_BASE_URL } from '../utils/api';
+import { normalizeMediaUrl } from '../utils/media';
 
 export default function BookDetails() {
   const { id } = useParams();
@@ -41,6 +42,7 @@ export default function BookDetails() {
   const [loadingSubscription, setLoadingSubscription] = useState(false);
   const [loadingBuy, setLoadingBuy] = useState(false);
   const [showBuyPaymentModal, setShowBuyPaymentModal] = useState(false);
+  const [coverImageFailed, setCoverImageFailed] = useState(false);
 
   // هل يملك المستخدم هذا الكتاب (أو يستطيع قراءته أونلاين)؟
   const [canReadOwned, setCanReadOwned] = useState(false);
@@ -318,6 +320,11 @@ export default function BookDetails() {
   const hasPaidPurchaseOption = effectivePurchasePrice > 0;
   const inSubscription = !!book?.availableInSubscription;
   const isFreeAccessBook = numericPrice === 0 && !inSubscription;
+  const coverImageUrl = normalizeMediaUrl(book?.coverImageUrl);
+
+  useEffect(() => {
+    setCoverImageFailed(false);
+  }, [coverImageUrl]);
 
   /* -------------------------------------------
      📖 READ VIA SUBSCRIPTION
@@ -530,10 +537,11 @@ export default function BookDetails() {
             {/* LEFT: COVER */}
             <Col md={4} className="book-details-cover-col d-flex align-items-stretch">
               <div className="w-100 d-flex align-items-center justify-content-center p-3">
-                {book.coverImageUrl ? (
+                {coverImageUrl && !coverImageFailed ? (
                   <img
-                    src={book.coverImageUrl}
+                    src={coverImageUrl}
                     alt={book.title}
+                    onError={() => setCoverImageFailed(true)}
                     style={{
                       maxHeight: '380px',
                       width: '100%',

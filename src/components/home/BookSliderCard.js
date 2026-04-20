@@ -1,18 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Badge } from 'react-bootstrap';
+import { normalizeMediaUrl } from '../../utils/media';
 
 export default function BookSliderCard({ book, openBook, getAccessBadges }) {
+  const coverUrl = normalizeMediaUrl(book.coverImageUrl);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [coverUrl]);
+
   return (
     <div className="book-slider-card-shell">
       <Card
         className="shadow-sm h-100 book-slider-card"
         onClick={() => openBook(book)}
       >
-        {book.coverImageUrl && (
+        {coverUrl && !imageFailed && (
           <Card.Img
             variant="top"
-            src={book.coverImageUrl}
+            src={coverUrl}
+            alt={book.title}
             className="book-slider-card__image"
+            onError={() => setImageFailed(true)}
           />
         )}
 

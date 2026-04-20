@@ -10,6 +10,7 @@ import {
   Row,
   Spinner,
 } from 'react-bootstrap';
+import { normalizeMediaUrl } from '../../utils/media';
 
 export default function HomeHero({
   loading,
@@ -28,10 +29,17 @@ export default function HomeHero({
   formatViews,
 }) {
   const [searchInput, setSearchInput] = useState(searchTerm || '');
+  const [spotlightImageFailed, setSpotlightImageFailed] = useState(false);
+
+  const spotlightCoverUrl = normalizeMediaUrl(spotlightBook?.coverImageUrl);
 
   useEffect(() => {
     setSearchInput(searchTerm || '');
   }, [searchTerm]);
+
+  useEffect(() => {
+    setSpotlightImageFailed(false);
+  }, [spotlightCoverUrl]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -313,11 +321,12 @@ export default function HomeHero({
                         Recently added to the library
                       </div>
                       <div className="d-flex align-items-center">
-                        {spotlightBook.coverImageUrl ? (
+                        {spotlightCoverUrl && !spotlightImageFailed ? (
                           <img
-                            src={spotlightBook.coverImageUrl}
+                            src={spotlightCoverUrl}
                             alt={spotlightBook.title}
                             className="hero-spotlight-book__cover"
+                            onError={() => setSpotlightImageFailed(true)}
                           />
                         ) : (
                           <div

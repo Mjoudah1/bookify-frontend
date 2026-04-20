@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Badge, Button } from 'react-bootstrap';
+import { normalizeMediaUrl } from '../../utils/media';
 
 export default function BookCard({
   book,
@@ -12,6 +13,12 @@ export default function BookCard({
   const priceNum = Number(book.price) || 0;
   const purchasePriceNum = Number(book.purchasePrice) || 0;
   const inSub = !!book.availableInSubscription;
+  const coverUrl = normalizeMediaUrl(book.coverImageUrl);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [coverUrl]);
 
   return (
     <Card
@@ -19,13 +26,14 @@ export default function BookCard({
       style={{ cursor: 'pointer' }}
       onClick={() => onOpen(book)}
     >
-      {book.coverImageUrl ? (
+      {coverUrl && !imageFailed ? (
         <div className="book-cover-wrap">
           <Card.Img
             variant="top"
-            src={book.coverImageUrl}
+            src={coverUrl}
             className="book-cover"
             alt={book.title}
+            onError={() => setImageFailed(true)}
           />
         </div>
       ) : (
