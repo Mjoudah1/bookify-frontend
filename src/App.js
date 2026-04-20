@@ -33,7 +33,6 @@ import {
   setupAutoLogout,
   listenStorageAuthChanges,
   logout,
-  hasInterests,
 } from './utils/auth';
 
 /* ================================
@@ -64,15 +63,6 @@ function ProtectedRoute({ children, allowedRoles }) {
 
   if (allowedRoles && !allowedRoles.includes(role)) {
     return <Navigate to="/" replace />;
-  }
-
-  if (
-    role === 'user' &&
-    location.pathname !== '/change-password' &&
-    location.pathname !== '/book-of-intrests' &&
-    !hasInterests()
-  ) {
-    return <Navigate to="/book-of-intrests" replace />;
   }
 
   return children;

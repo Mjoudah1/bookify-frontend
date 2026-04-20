@@ -101,8 +101,6 @@ export default function Login() {
         navigate('/admin');
       } else if (role === 'staff') {
         navigate('/staff');
-      } else if (!res.data?.user?.hasInterests) {
-        navigate('/book-of-intrests');
       } else {
         navigate('/user');
       }

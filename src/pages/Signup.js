@@ -125,7 +125,7 @@ export default function Signup() {
         } else if (role === 'staff') {
           navigate('/staff');
         } else {
-          navigate('/book-of-intrests');
+          navigate('/user');
         }
       } catch (loginErr) {
         console.error('Auto login error:', loginErr);

@@ -27,9 +27,7 @@ export default function SocialAuthCallback() {
     saveToken(token);
     setHasInterests(hasInterestSelection);
 
-    navigate(hasInterestSelection ? '/user' : '/book-of-intrests', {
-      replace: true,
-    });
+    navigate('/user', { replace: true });
   }, [location.search, navigate]);
 
   return (
