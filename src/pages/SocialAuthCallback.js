@@ -12,6 +12,7 @@ export default function SocialAuthCallback() {
     const params = new URLSearchParams(location.search);
     const token = params.get('token');
     const socialError = params.get('error');
+    const isNewUser = params.get('isNewUser') === 'true';
     const hasInterestSelection = params.get('hasInterests') === 'true';
 
     if (socialError) {
@@ -27,7 +28,7 @@ export default function SocialAuthCallback() {
     saveToken(token);
     setHasInterests(hasInterestSelection);
 
-    navigate('/user', { replace: true });
+    navigate(isNewUser ? '/book-of-intrests' : '/user', { replace: true });
   }, [location.search, navigate]);
 
   return (
